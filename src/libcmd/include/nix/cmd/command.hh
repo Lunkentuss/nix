@@ -112,7 +112,7 @@ private:
  * A mixin class for commands that process flakes, adding a few standard
  * flake-related options/flags.
  */
-struct MixFlakeOptions : virtual Args, EvalCommand
+struct MixFlakeOptions : virtual Args, virtual EvalCommand
 {
     flake::LockFlags lockFlags;
 

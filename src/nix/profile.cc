@@ -560,7 +560,7 @@ struct AllMatcher final : public Matcher
 
 AllMatcher all;
 
-class MixProfileElementMatchers : virtual Args, virtual StoreCommand
+class MixProfileElementMatchers : public virtual EvalCommand, virtual Args, virtual StoreCommand, public virtual MixDefaultProfile
 {
     std::vector<ref<Matcher>> _matchers;
 
@@ -595,6 +595,13 @@ public:
                     } else {
                         _matchers.push_back(make_ref<NameMatcher>(arg));
                     }
+                }
+            }},
+            .completer = {[&](AddCompletions & completions, size_t, std::string_view prefix) {
+                ProfileManifest manifest(*getEvalState(), *profile);
+                for (const auto & [i, e] : enumerate(manifest.elements)) {
+                    auto & [name, element] = e;
+                    completions.add(name);
                 }
             }}
         });
@@ -631,7 +638,7 @@ public:
     }
 };
 
-struct CmdProfileRemove : virtual EvalCommand, MixDefaultProfile, MixProfileElementMatchers
+struct CmdProfileRemove : MixProfileElementMatchers
 {
     std::string description() override
     {
@@ -673,7 +680,7 @@ struct CmdProfileRemove : virtual EvalCommand, MixDefaultProfile, MixProfileElem
     }
 };
 
-struct CmdProfileUpgrade : virtual SourceExprCommand, MixDefaultProfile, MixProfileElementMatchers
+struct CmdProfileUpgrade : virtual SourceExprCommand, MixProfileElementMatchers
 {
     std::string description() override
     {
